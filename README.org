@@ -1,0 +1,96 @@
+* Crimsonbot2
+  Crimsonbot is an open-source modular robotics project under active development at Indiana University's School of Informatics, Computing, and Engineering (SICE).
+
+  This is the 2nd version of the platform, based on the NodeMCU running [[http://micropython.org/][MicroPython]].
+  Documentation for using MicroPython with the NodeMCU can be found [[https://docs.micropython.org/en/latest/esp8266/][here]].
+
+  This repository contains everything related to the Crimsonbot, which includes both the libraries that Crimsonbot2 *users* might want to integrate into their projects, as well as admin tools for *instructors* to use to deploy a fleet of robots in a class.
+
+  These different Crimsonbot2-related components are organized by folder:
+
+  - [[./libs][libs]] contains libraries for Crimsonbot2 sensors
+  - [[./libs_documentation][libs_documentation]] contains information about the libraries from libs
+  - [[./webrepl][webrepl]] contains a mirror of the MicroPython web-based interface, which comes in handy if your computer only has 1 wireless connection, and it's currently busy with the Crimsonbot2 and can't connect to the internet
+  - [[./admin][admin]] contains tools for teachers to set up individual addresses which makes it easier to manage many 'bots.
+  - [[./images][images]] contains images and figures used in this documentation
+
+** Crimsonbot2 Libraries
+   One goal of the Crimsonbot2 project is to provide a limited number of useful libraries for sensors and actuators, both to serve as a model for student-created libraries, and also to allow students to save time by providing a high level interface for devices which can (sometimes) be extremely low-level.
+   
+   Combining different sensors and actuators is one way to synthesize more interesting robot controls.
+
+   Documentation for the libraries is separate, to make uploading libraries simpler.
+
+*** install a library onto your robot (webrepl example)
+    In the webrepl, use the *upload button* to find the =libs/crimsonbot.py= file and upload it to the robot.
+
+*** install a library onto your robot ([[https://github.com/adafruit/ampy][ampy]] example)
+    Note: download [[https://github.com/adafruit/ampy][ampy]] first.
+
+    From the command line:
+    1. navigate to this repository folder =cd location/of/this/repository=
+    2. use =ampy --port /dev/tty.SLAB_USBtoUART put libs/crimsonbot.py=
+
+    Note that =/dev/tty.SLAB_USBtoUART= is how the NodeMCU appears on OSX.
+    On Linux it may be =/dev/ttyACM0= or =/dev/ttyACM1=.
+    On Windows it may be something like =COM1= (unverified).
+    Use your platform's specific naming convention.
+
+*** install /all the libraries at once/ onto your robot using ~ampy~
+    Replace step 2 from above with 
+    1. =ampy --port /dev/tty.SLAB_USBtoUART mkdir libs=
+    2. =ampy --port /dev/tty.SLAB_USBtoUART put libs=
+    
+    More detailed information about various ampy commands can be found using the ampy command-line ~--help~ flag, or by reading the [[https://github.com/adafruit/ampy/blob/master/ampy/cli.py][source]].
+
+*** use the library you just uploaded
+   1. /import/ it into RAM from within the webrepl python console =>>> import crimsonbot as cb=
+   2. now you can /use/ the crimsonbot functions, such as =cb.forward(speed)= and =cb.stop()=
+  
+** Pinout
+   We use the NodeMCU revision 2 board.  See [[https://frightanic.com/iot/comparison-of-esp8266-nodemcu-development-boards/][here]] for a description of the different revisions.
+   The NodeMCU has physical pins, some of which connect to the on-board ESP8266 chip.
+   It's important to remember that the physical pin labels on the NodeMCU board are *NOT* the same as the numbering used by MicroPython.
+
+   To use these pins we have to map from the physical pin to the logical pin used in MicroPython.
+
+   [[./images/pins.png]]
+
+   | Physical | MicroPython | notes                                                                                           |
+   |----------+-------------+-------------------------------------------------------------------------------------------------|
+   | Vin      | n.a.        | 5V recommended, 10V max                                                                         |
+   | GND      | n.a.        | all GND pins are common                                                                         |
+   | 3.3V     | n.a.        | 3.3V output from on-board regulator (all 3.3V pins common), max 1A (shared by all 3.3V devices) |
+   | A0       | =ADC(0)=    | used by =ADC= class, e.g. =myadc = ADC(0)=                                                      |
+   | D0       | =GPIO 16=   | connected to power-on reset signal, used for sleep mode, *avoid*                                |
+   | D1       | =GPIO 5=    | Left Motor Speed (when used with motor board)                                                   |
+   | D2       | =GPIO 4=    | Right Motor Speed (when used with motor board)                                                  |
+   | D3       | =GPIO 0=    | Left Motor Direction (when used with motor board)                                               |
+   | D4       | =GPIO 2=    | Right motor direction (when used with motor board)                                              |
+   | D5       | =GPIO 14=   |                                                                                                 |
+   | D6       | =GPIO 12=   |                                                                                                 |
+   | D7       | =GPIO 13=   |                                                                                                 |
+   | D8       | =GPIO 15=   | messes with flash memory if held high at startup, *avoid*                                         |
+   | RX       | =GPIO 3=    | shared with serial UART, *avoid*                                                                  |
+   | TX       | =GPIO 1=    | shared with serial UART, *avoid*                                                                  |
+
+** Firmware, webrepl
+   If the microcontroller is already flashed with MicroPython firmware, you can skip this section, otherwise follow [[https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/index.html][these instructions]].
+
+   Here's an overview of the instructions:
+
+   1. get the [[http://www.silabs.com/Support%20Documents/Software/Mac_OSX_VCP_Driver.zip][driver]] if you need it
+   2. flash MicroPython firmware to board
+   3. log in to the board over USB/serial, e.g. =screen /dev/ttyUSB{id} 115200=
+   4. Enable the webrepl =>>> import webrepl_setup= and then choose =e= to enable the webrepl at power-on. Set a password, then reboot.
+   5. from then on you can connect to the microcontroller over wifi
+
+
+* Further Reading
+  - [[https://iotbytes.wordpress.com/esp8266/][esp8266]] (separate from NodeMCU)
+  - [[http://micropython.org/webrepl/][web repl]]
+  - [[https://smartarduino.gitbooks.io/user-mannual-for-esp-12e-motor-shield/content/interface.html][motor shield]]
+  - [[https://docs.micropython.org/en/latest/esp8266/library/utime.html?highlight=sleep#utime.sleep_ms][micropython documentation]]
+
+* naming
+  IU colors are Cream and Crimson, and the original version of this robot was heavily inspired by the SparkFun RedBot.  Our first version also had a translucent red acrylic chassis.  Further iterations have kept the name but not necessarily the same color scheme.

@@ -1,0 +1,28 @@
+* Standard Micropython on NodeMCU
+To bring a NodeMCU board to a "clean slate", follow [[https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html][these instructions]], or:
+
+#+begin_src bash
+./factory_reset.sh
+#+end_src
+
+Note that this will erase all your files, including ~crimsonbot.py~, and will also reset ~webrepl_setup~ so you'll need to re-enable the webrepl if desired.
+
+
+* Debugging
+You may encounter this error:
+
+#+begin_src bash
+-bash: /usr/local/bin/esptool.py: /usr/local/opt/python/bin/python2.7: bad interpreter: No such file or directory
+#+end_src
+
+For me this meant that ~esptool.py~ used the wrong location for Python.
+
+I edited my esptool.py so it can find python on my system:
+
+#+begin_src diff
++ #!/usr/bin/env python2
+- #!/usr/local/opt/python/bin/python2.7
+# EASY-INSTALL-SCRIPT: 'esptool==2.0.1','esptool.py'
+__requires__ = 'esptool==2.0.1'
+__import__('pkg_resources').run_script('esptool==2.0.1', 'esptool.py')
+#+end_src

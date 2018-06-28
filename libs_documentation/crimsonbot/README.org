@@ -1,0 +1,102 @@
+* CrimsonBot2 API
+  Below is the API for the core =crimsonbot= library.  Its source code can be found in =crimsonbot.py=.
+
+** Constants
+
+*** =IN=
+    Indicates a Pin should be used as an input
+
+*** =OUT=
+    Indicates a Pin should be used as an output
+
+*** =OPEN_DRAIN=
+    Indicates a Pin should include an open drain
+
+*** =PULL_UP=
+    Indicates a Pin should include a pull up resistor
+
+*** =LEFT=
+    Used in motor functions to configure the left motor
+
+*** =RIGHT=
+    Used in motor functions to configure the right motor
+
+** Functions
+*** =delay(ms)=
+    Pauses the execution of the process for =ms= milliseconds.
+
+*** =pinMode(pin, mode)=
+    Sets a pin on the motor board [0-8] to a specific mode.  This *must* be called before calling =read= or =write= or =analogWrite=.
+
+    #+BEGIN_QUOTE
+    Pins [1-4] are mapped to both GPIO and the motors on the motor board, in the event that the motor functions are called (i.e. =forward=, =left=, =right=, etc) these pins should not be used for standard GPIO as the behavior will be unpredictable.
+    #+END_QUOTE
+
+*** =read(pin)=
+    Reads the digital value on =pin=.
+
+*** =write(pin, value)=
+    Writes the digital =value= to the =pin=
+
+*** =analogWrite(pin, value)=
+    Writes the analog =value= to the =pin=
+
+*** =forward(speed)=
+    Moves the robot forward at the specified speed.
+
+*** =left(speed)=
+    Turns the robot left at the specified speed, keeping the left wheel at the same location.
+
+*** =pivotLeft(speed)=
+    Turns the robot left at the specified speed, rotating around the center of the robot.
+
+*** =right(speed)=
+    Turns the robot right at the specified speed, keeping the right wheel at the same location.
+
+*** =pivotRight(speed)=
+    Turns the robot right at the specified speed, rotating around the center of the robot.
+
+*** =setSpeed(side, speed)=
+    Sets the speed of a single motor, side may be LEFT or RIGHT (in the crimsonbot namepsace).
+
+*** =reset_modules()=
+    Removes all user loaded modules from the board and resets it for new file uploads.
+
+*** =stop()=
+    Causes the robot to stop.
+
+*** =shutdown()=
+    Halts ongoing robot actions.
+
+*** =run(wait=1)=
+    Executes the code in =robot.py=.  This function is hot-swapping and will load new =robot.py= code even if the MCU is not restarted.
+
+** robot.py
+
+   The =robot.py= file may be uploaded to a NodeMCU board running micropython with the crimsonbot library installed.  This file must follow the below template.
+
+   #+BEGIN_SRC python
+def setup():
+    # Initialization code here
+    pass
+    
+def loop():
+    # Code in this function will be called infinitely
+    pass
+   #+END_SRC
+
+   The =setup= function will be called once when the program is first run and may be used to setup sensors or other peripherals.
+
+   The =loop= function will be called every =wait= time - as per the =run= call that started the program - until the MCU is turned off or recieves a KeyboardInterrupt (For example a CTRL+C from the REPL).
+
+   For simplicity, the following template is included which may be used to start your crimsonbot project.
+
+   #+BEGIN_SRC python
+from crimsonbot import *
+
+def setup():
+    pass
+    
+def loop():
+    pass
+   #+END_SRC

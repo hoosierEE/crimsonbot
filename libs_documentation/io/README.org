@@ -1,0 +1,61 @@
+* io
+  MicroPython SX1509 library
+
+  SparkFun has a [[https://learn.sparkfun.com/tutorials/sx1509-io-expander-breakout-hookup-guide][wiring tutorial]], as well as a [[https://github.com/sparkfun/SparkFun_SX1509_Arduino_Library][C++ library]], which is currently more complete than this version.
+
+** example usage
+
+   #+begin_src python
+import io
+myIO = io.IO()  # create a local copy of the io library, called "myIO"
+
+# from machine import Pin
+# myIO2 = io.IO(0x3f, Pin(5), Pin(4))  # another IO, using different pins, different I2C address
+
+myIO.pin_mode(2, myIO.INPUT)  # set pin 2 to be an input
+myIO.pin_mode(3, myIO.OUTPUT)  # set pin 3 to be an output
+
+x = myIO.digital_read(2)  # read the value at pin 2
+myIO.digital_write(3)  # write the value we just read to pin 3
+
+y = myIO.digital_read(3)  # this is valid code, but calling digital_read on an output pin is silly
+   #+end_src
+
+* user manual
+  Definitions:
+  - functions are documented below in the following format:
+    ~function_name(parameter1, parameter2, ..., parameterN) → return_value~
+  - ~pin~ means a number from 0-15, corresponding to numbering printed on the board
+  - ~→ bool~ means "return a boolean value" or equivalently "returns either 0 or 1"
+  - ~→ uint~ means "returns an unsigned integer value"
+  - ~→ ()~ means "does not return any value"
+
+** TODO IO(address, scl, sda) → Object
+   Constructs an instance of the IO object.
+   All parameters have default values provided:
+   - ~address~ is the default I2C address for the SX1509: ~0x3e~.
+     If you modify the SX1509 hardware, the other possible addresses are: ~0x3f~, ~0x70~, or ~0x71~.
+   - ~scl~ is the clock pin.  Can be any NodeMCU GPIO pin, but ~14~ (labeled ~D5~ on the board) is preferred.
+   - ~sda~ is the data pin.  Can be any NodeMCU GPIO pin, but ~12~ (labeled ~D6~ on the board) is preferred.
+   
+   Returns an ~IO~ object.
+
+** pin_mode(pin, mode) → ()
+   Set the specified ~pin~ (0-15) to be one of the following modes ~INPUT~, ~INPUT_PULLUP~, ~INPUT_PULLDOWN~, ~OUTPUT~, or ~OUTPUT_OPENDRAIN~.  Does not return a value.
+
+** digital_read(pin) → bool
+   Read the value of the specified ~pin~ number (0-15). Returns ~0~ if the value of the pin is a logical low value, otherwise ~1~.
+
+   Warning: ~digital_read~ will return a value for both input- and output-configured pins (but you probably want to use it for inputs only)
+
+** digital_write(pin, value) → ()
+   Given a pin (0-15) and a value (0 or 1), write the value to the pin.  Does not return a value.
+
+   Warning: like ~digital_read~, this function does not check whether the pin is configured as an output.  In the case that the pin is configured as an input, ~digital_write~ will set the pull-up
+
+   # TODO implement these:
+   # ** analog_write(pin, value) → ()
+   # ** enable_interrupt(pin, type) → ()
+   # ** interrupt_source() → uint
+   # ** debounce_time(ms) → ()
+   # ** debounce_pin(pin) → ()

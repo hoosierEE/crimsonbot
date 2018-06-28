@@ -1,0 +1,34 @@
+* CrimsonBot2 Tools
+  These files are meant to be run on a laptop (not a NodeMCU).
+
+** =inv.dat=
+   This file is of the form
+
+   #+BEGIN_SRC
+<mac address> <ip address> <newline>
+   #+END_SRC
+
+   The idea here is that this file can be used by the WiFi router to match MAC with IP addresses.  This allows us to use static naming scheme for the individual NodeMCUs.
+
+** =add_to_inv.py=
+   Run this file to add a new NodeMCU (i.e. a new MAC address) to the =inv.dat= list.
+
+** =create_dhcp.py=
+   Run this to create a new =dhcpd.conf= file, which does (???)
+
+** =flash.sh=
+   /Prerequisite: esptool.py/
+
+   Run this to flash the default CrimsonBot libraries to a NodeMCU (which must be attached via USB).
+
+   Note that this script assumes the NodeMCU will appear as =/dev/ttyUSB0=, which is how it appears on Jeremy's laptop.
+
+   Other systems may show a different name for NodeMCU, and if you have more than 1 attached, there will be 2 different names.
+
+   #+BEGIN_QUOTE
+   Also note that you must have drivers already installed or it won't show up at all.
+   Check out the SLAB USB UART driver from Silicon Labs.
+   #+END_QUOTE
+
+** =esp-something.bin=
+   This image is MicroPython for the NodeMCU.  *DEFINITELY REQUIRED*

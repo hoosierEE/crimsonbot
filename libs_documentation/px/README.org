@@ -1,0 +1,142 @@
+* Px
+  Library for controlling individually-addressable LED strips based on LPD8806
+
+* hardware
+  [[https://www.adafruit.com/product/306][Adafruit]] sells strips up to 5m long.
+
+* wiring
+  Default wiring:
+
+  | NodeMCU | LPD8806 |
+  |---------+---------|
+  | Vin     | +       |
+  | GND     | GND     |
+  | D5      | CLK     |
+  | D7      | DATA    |
+
+  You can use other pins for ~CLK~ and ~DATA~, but they need to be specified in the ~Px()~ constructor, along with the number of LEDs in the strip.
+
+  Example using non-default arguments:
+
+  #+begin_src python
+my_count = 32  # default is 16
+my_clock = 10  # default is D5 (GPIO 14)
+my_data = 9    # default is D7 (GPIO 13)
+p = Px(my_count, my_clock, my_data)
+  #+end_src
+
+* colors
+  The provided functions accept as arguments values for red, green, and blue intensity.
+  - min: 0
+  - max: 127
+  
+  Mix red, green, and blue to make other colors:
+
+  |   r |   g |   b | approximate color |
+  |-----+-----+-----+-------------------|
+  | 127 | 127 | 127 | bright white      |
+  | 127 |   0 |   0 | bright red        |
+  |   0 | 127 |   0 | bright green      |
+  |   0 |   0 | 127 | bright blue       |
+  |   1 |   0 |   0 | dim red           |
+  |   2 |   1 |   0 | dim orange        |
+  |   1 |   1 |   0 | dim yellow        |
+  |   0 |   1 |   0 | dim green         |
+  |   0 |   0 |   1 | dim blue          |
+  |   0 |   1 |   1 | dim cyan          |
+  |   1 |   0 |   1 | dim violet        |
+  |   1 |   1 |   1 | dim gray          |
+
+* example
+
+  #+begin_src python
+from px import Px
+# Px(count=16, clk=14, data=13)
+# count is number of LEDs in the strip,
+# clk is software SPI clock pin
+# data is software SPI MOSI pin
+p = Px()  # initialize LED strip, defaults to 16 LEDs
+
+# all(red, green, blue)
+p.all(127, 0, 0)  # full RED, zero BLUE, zero GREEN intensity
+
+# one(N, red, green, blue)
+p.one(2, 0, 80, 40)  # bluish green on LED index 2 (3rd from start)
+p.one(2, 0, 0, 0)  # turn off LED at index 2
+
+p.clear()  # all LEDs off
+  #+end_src
+
+* user manual
+** functions
+*** Px(count, clk, data) → ()
+    Constructs an instance of the Px object.
+    Default values are provided for all parameters:
+
+    - ~count~ (GPIO 16), number of LEDs per strip
+    - ~clk~ (GPIO 14), SPI clock pin
+    - ~data~ (GPIO 13), SPI MOSI pin
+
+   *NOTE* that GPIO pin 12 (D6 on the NodeMCU) is configured as SPI MISO, but not used by ~Px~.
+
+*** one(n, r, g, b) → ()
+   Set one LED to the specified color.
+
+   - ~n~ 0-based index of target LED
+   - ~r~ red intensity (0-127)
+   - ~g~ green intensity (0-127)
+   - ~b~ blue intensity (0-127)
+
+*** all(r, g, b) → ()
+   Set all LEDs in the strip to the specified color.
+
+   Equivalent to calling ~one~ with the same set of (r, g, b) values for each LED in the strip.
+
+   - ~r~ red intensity (0-127)
+   - ~g~ green intensity (0-127)
+   - ~b~ blue intensity (0-127)
+
+*** clear() → ()
+   Turn off all LEDs.
+
+   Equivalent to ~all(0, 0, 0)~.
+
+*** show() → ()
+   Write the values of the internal ~pixels~ array out the SPI MOSI pin.
+   The above methods (~one~, ~all~, ~clear~) call ~show~ internally, so usually you don't need to call this method yourself.
+
+** internal data
+*** count
+    Number of LEDs in the strip. Default 16.
+*** pixels
+    List-of-lists.  There are ~count~ sub-lists.  Each sub-list is ~[ green, red, blue ]~ values.  They are stored as GRB internally because that is how the LPD8806 actually interprets the bytes.
+*** latch
+    For every /n/ LEDs up to 32, you need to send color data for all /n/, plus a trailing ~0~ which tells the LPD8806 to stop piping data down the stream and display the values as color instead.
+
+    For each additional 32 LEDs, you need another ~0~.
+    The ~show~ function automatically adds this when it sends the data over SPI.
+
+* advanced usage
+Internally, colors are stored as a list of GRB lists.  There is 1 GRB list for each pixel in the strip:
+
+#+begin_src python
+[ [ g0, r0, b0 ],
+  [ g1, r1, b1 ],
+  ...
+  [ gN, rN, bN ] ]
+#+end_src
+
+To write many LEDs at once, it is faster to modify this internal list-of-lists than to repeatedly call ~one~ to set an individual LED's color.
+
+** example
+
+#+begin_src python
+from px import Px
+p = Px()
+
+# set each pixel in the string to a variable amount of green, red, and a fixed amount of blue
+for i in range(p.count):
+  p.pixels[i] = [ i*10, i%3, 14 ]  
+p.show()  # need to call this method yourself if not using all/one/clear
+
+#+end_src
