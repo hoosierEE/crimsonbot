@@ -32,9 +32,9 @@
     2. use =ampy --port /dev/tty.SLAB_USBtoUART put libs/crimsonbot.py=
 
     Note that =/dev/tty.SLAB_USBtoUART= is how the NodeMCU appears on OSX.
-    On Linux it may be =/dev/ttyACM0= or =/dev/ttyACM1=.
-    On Windows it may be something like =COM1= (unverified).
-    Use your platform's specific naming convention.
+    On Linux it may be =/dev/ttyACM0= or =/dev/ttyUSB0=.
+    On Windows it may be something like =COM3= (unverified).
+    Some guesswork may be required.
 
 *** install /all the libraries at once/ onto your robot using ~ampy~
     Replace step 2 from above with 
