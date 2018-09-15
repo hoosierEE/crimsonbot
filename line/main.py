@@ -30,7 +30,6 @@ def line():
                 cb.right(spd // 2)
             else:
                 cb.forward(spd)
-
         cb.delay(dly)
 
 # line()
@@ -47,7 +46,6 @@ def test():
         if ld or rd:
             powerstop(100)
             return
-
         cb.delay(0)
 
 test()
